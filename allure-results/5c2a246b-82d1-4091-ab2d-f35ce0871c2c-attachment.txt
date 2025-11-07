@@ -1,0 +1,5 @@
+✅ Успешно кликнули на Лента Заказов
+✅ Успешно перешли на страницу заказов: https://stellarburgers.education-services.ru/feed
+✅ Успешно кликнули на Конструктор
+✅ Успешно вернулись в конструктор: https://stellarburgers.education-services.ru/
+✅ Конструктор успешно загружен
