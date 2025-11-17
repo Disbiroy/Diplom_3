@@ -59,7 +59,7 @@ class TestMain:
             time.sleep(2)
 
         with allure.step("Проверить открытие модального окна"):
-            modal_displayed = main_page.is_modal_displayed()
+            modal_displayed = main_page.is_modal_visible()
             if modal_displayed:
                 print("✅ Модальное окно открылось")
                 assert True
@@ -106,7 +106,7 @@ class TestMain:
 
         with allure.step("Проверить работу счетчиков"):
             counter = main_page.get_ingredient_counter(0)
-            assert isinstance(counter, int)
+            assert counter == "0" or counter.isdigit(), f"Счетчик должен быть числом, получено: {counter}"
 
 
 @allure.feature("Лента заказов")
