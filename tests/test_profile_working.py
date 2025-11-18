@@ -1,10 +1,9 @@
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import pytest
-import time
 import allure
 from data import TestData
 from pages.main_page import MainPage
@@ -12,78 +11,86 @@ from pages.login_page import LoginPage
 from pages.profile_page import ProfilePage
 
 
-@allure.feature("Личный кабинет")
+@allure.feature("Работа с профилем")
 class TestProfileWorking:
 
-    @pytest.fixture(scope="function")
-    def login(self, driver):
-        """Фикстура для логина и перехода в профиль"""
+    @allure.title("Переход в профиль после авторизации")
+    def test_go_to_profile_after_login(self, driver):
         main_page = MainPage(driver)
         login_page = LoginPage(driver)
         profile_page = ProfilePage(driver)
 
-        # Логинимся
         main_page.open()
         main_page.go_to_login_page()
+        login_page.wait_for_page_load()
+
         login_page.login(TestData.TEST_EMAIL, TestData.TEST_PASSWORD)
+        main_page.wait_for_page_load()
 
-        # Переходим в личный кабинет
-        time.sleep(2)
-        profile_page.go_to_profile()
+        main_page.go_to_profile()
+        profile_page.wait_for_page_load()
 
-        # Ждем загрузки профиля
-        time.sleep(2)
+        assert profile_page.is_profile_page_loaded()
 
-        yield
-
-        # Выход после каждого теста
-        try:
-            if "account" in driver.current_url:
-                profile_page.logout()
-                time.sleep(2)
-        except:
-            pass
-
-    @allure.title("Переход в личный кабинет после логина")
-    def test_go_to_profile_after_login(self, driver, login):
+    @allure.title("Выход из профиля")
+    def test_logout_from_profile(self, driver):
+        main_page = MainPage(driver)
+        login_page = LoginPage(driver)
         profile_page = ProfilePage(driver)
 
-        # Проверяем что мы в личном кабинете
-        assert "account" in driver.current_url
-        print("Успешно перешли в личный кабинет")
+        main_page.open()
+        main_page.go_to_login_page()
+        login_page.wait_for_page_load()
 
-    @allure.title("Выход из аккаунта")
-    def test_logout_from_profile(self, driver, login):
-        profile_page = ProfilePage(driver)
+        login_page.login(TestData.TEST_EMAIL, TestData.TEST_PASSWORD)
+        main_page.wait_for_page_load()
 
-        # Выходим из аккаунта
+        main_page.go_to_profile()
+        profile_page.wait_for_page_load()
+
         profile_page.logout()
-        time.sleep(2)
+        login_page.wait_for_page_load()
 
-        # Проверяем что вернулись на страницу логина
-        assert "login" in driver.current_url
-        print("Успешно вышли из аккаунта")
+        assert login_page.is_login_button_visible()
 
-    @allure.title("Переход в конструктор из личного кабинета")
-    def test_go_to_constructor_from_profile(self, driver, login):
+    @allure.title("Переход в конструктор из профиля")
+    def test_go_to_constructor_from_profile(self, driver):
+        main_page = MainPage(driver)
+        login_page = LoginPage(driver)
         profile_page = ProfilePage(driver)
 
-        # Переходим в конструктор
-        profile_page.go_to_constructor()
-        time.sleep(2)
+        main_page.open()
+        main_page.go_to_login_page()
+        login_page.wait_for_page_load()
 
-        # Проверяем что мы на главной странице
-        assert driver.current_url == TestData.MAIN_URL
-        print("Успешно перешли в конструктор")
+        login_page.login(TestData.TEST_EMAIL, TestData.TEST_PASSWORD)
+        main_page.wait_for_page_load()
+
+        main_page.go_to_profile()
+        profile_page.wait_for_page_load()
+
+        profile_page.go_to_constructor()
+        main_page.wait_for_page_load()
+
+        assert main_page.is_constructor_section_visible()
 
     @allure.title("Переход в историю заказов")
-    def test_go_to_order_history(self, driver, login):
+    def test_go_to_order_history(self, driver):
+        main_page = MainPage(driver)
+        login_page = LoginPage(driver)
         profile_page = ProfilePage(driver)
 
-        # Переходим в историю заказов
-        profile_page.go_to_order_history()
-        time.sleep(2)
+        main_page.open()
+        main_page.go_to_login_page()
+        login_page.wait_for_page_load()
 
-        # Проверяем что мы на странице истории заказов
-        assert "order-history" in driver.current_url
-        print("Успешно перешли в историю заказов")
+        login_page.login(TestData.TEST_EMAIL, TestData.TEST_PASSWORD)
+        main_page.wait_for_page_load()
+
+        main_page.go_to_profile()
+        profile_page.wait_for_page_load()
+
+        profile_page.go_to_order_history()
+        profile_page.wait_for_page_load()
+
+        assert profile_page.is_order_history_visible()
