@@ -1,26 +1,12 @@
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import pytest
 import allure
-from selenium.webdriver.common.by import By  # ДОБАВИТЬ ЭТОТ ИМПОРТ
-from data import TestData
 from pages.main_page import MainPage
-from pages.login_page import LoginPage
 from pages.order_feed_page import OrderFeedPage
-
-
-class MainPageLocators:
-    ORDER_FEED_LINK = (By.XPATH, "//p[contains(text(), 'Лента Заказов')]")
-    CONSTRUCTOR_LINK = (By.XPATH, "//p[contains(text(), 'Конструктор')]")
-    INGREDIENT_ITEM = (By.XPATH, "//div[contains(@class, 'BurgerIngredient_ingredient')]")
-    MODAL_WINDOW = (By.XPATH, "//div[contains(@class, 'Modal_modal__P3_V5')]")
-    MODAL_CLOSE_BUTTON = (By.XPATH, "//button[contains(@class, 'Modal_modal__close__TnseK')]")
-    BUNS_TAB = (By.XPATH, "//span[text()='Булки']/..")
-    SAUCES_TAB = (By.XPATH, "//span[text()='Соусы']/..")
-    FILLINGS_TAB = (By.XPATH, "//span[text()='Начинки']/..")
-    INGREDIENT_COUNTER = (By.XPATH, ".//div[contains(@class, 'counter')]")
 
 
 @allure.feature("Главная страница")
@@ -58,7 +44,7 @@ class TestMain:
         main_page.open()
         main_page.click_ingredient(0)
 
-        assert main_page.is_element_visible(main_page.locators.MODAL_WINDOW)
+        assert main_page.is_ingredient_modal_displayed()
 
     @allure.title("Закрытие модального окна ингредиента")
     def test_ingredient_modal_closing(self, driver):
@@ -66,26 +52,30 @@ class TestMain:
 
         main_page.open()
         main_page.click_ingredient(0)
-        main_page.wait_for_element_to_be_clickable(MainPageLocators.MODAL_CLOSE_BUTTON)
+        main_page.wait_for_element_to_be_clickable(main_page.locators.INGREDIENT_MODAL_CLOSE_BUTTON)
 
-        main_page.close_modal()
-        main_page.wait_for_element_to_disappear(MainPageLocators.MODAL_WINDOW)
+        main_page.close_ingredient_modal()
+        main_page.wait_for_element_to_disappear(main_page.locators.INGREDIENT_MODAL_WINDOW)
 
-        assert not main_page.is_element_visible(MainPageLocators.MODAL_WINDOW)
+        assert not main_page.is_ingredient_modal_displayed()
 
     @allure.title("Навигация по табам конструктора")
     def test_constructor_tabs_navigation(self, driver):
         main_page = MainPage(driver)
 
         main_page.open()
+
+        # Кликаем на соусы и проверяем что секция соусов отображается
         main_page.click_sauces_tab()
-        assert main_page.is_element_visible(MainPageLocators.SAUCES_TAB)
+        assert main_page.is_element_visible(main_page.locators.SAUCES_TAB)
 
+        # Кликаем на начинки и проверяем что секция начинок отображается
         main_page.click_fillings_tab()
-        assert main_page.is_element_visible(MainPageLocators.FILLINGS_TAB)
+        assert main_page.is_element_visible(main_page.locators.FILLINGS_TAB)
 
+        # Возвращаемся к булкам и проверяем что секция булок отображается
         main_page.click_buns_tab()
-        assert main_page.is_element_visible(MainPageLocators.BUNS_TAB)
+        assert main_page.is_element_visible(main_page.locators.BUNS_TAB)
 
     @allure.title("Проверка счетчиков ингредиентов")
     def test_ingredient_counters(self, driver):

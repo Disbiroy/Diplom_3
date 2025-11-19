@@ -4,22 +4,29 @@ from .base_page import BasePage
 
 
 class MainPageLocators:
+    # Основные элементы страницы
     LOGIN_BUTTON = (By.XPATH, "//button[text()='Войти в аккаунт']")
     PROFILE_BUTTON = (By.XPATH, "//a[contains(@href, 'account')]")
     CONSTRUCTOR_SECTION = (By.XPATH, "//h1[text()='Соберите бургер']")
     ORDER_FEED_LINK = (By.XPATH, "//p[contains(text(), 'Лента Заказов')]")
     CONSTRUCTOR_LINK = (By.XPATH, "//p[contains(text(), 'Конструктор')]")
+
+    # Ингредиенты
     INGREDIENT_ITEM = (By.XPATH, "//div[contains(@class, 'BurgerIngredient_ingredient')]")
     INGREDIENT_COUNTER = (By.XPATH, ".//div[contains(@class, 'counter')]")
 
-    # УНИВЕРСАЛЬНЫЕ ЛОКАТОРЫ ДЛЯ МОДАЛЬНОГО ОКНА
-    MODAL_WINDOW = (By.XPATH, "//div[contains(@class, 'Modal_modal') or contains(@class, 'modal')]")
-    MODAL_CLOSE_BUTTON = (By.XPATH,
-                          "//button[contains(@class, 'Modal_modal__close') or contains(@class, 'modal__close')]")
+    # Модальное окно ингредиента
+    INGREDIENT_MODAL_WINDOW = (By.XPATH, "//div[contains(@class, 'Modal_modal')]")
+    INGREDIENT_MODAL_CLOSE_BUTTON = (By.XPATH,
+                                     "//div[contains(@class, 'Modal_modal')]//button[contains(@class, 'Modal_modal__close')]")
 
+    # Вкладки конструктора
     BUNS_TAB = (By.XPATH, "//span[text()='Булки']/..")
     SAUCES_TAB = (By.XPATH, "//span[text()='Соусы']/..")
     FILLINGS_TAB = (By.XPATH, "//span[text()='Начинки']/..")
+
+    # Кнопка оформления заказа
+    ORDER_BUTTON = (By.XPATH, "//button[text()='Оформить заказ']")
 
 
 class MainPage(BasePage):
@@ -42,7 +49,7 @@ class MainPage(BasePage):
 
     @allure.step("Открыть главную страницу")
     def open(self):
-        self.driver.get(self.url)  # ВЕРНУЛИ КАК БЫЛО!
+        self.driver.get(self.url)
 
     @allure.step("Кликнуть на ленту заказов")
     def click_order_feed(self):
@@ -56,16 +63,21 @@ class MainPage(BasePage):
     def click_ingredient(self, index=0):
         ingredients = self.find_elements(self.locators.INGREDIENT_ITEM)
         if ingredients and index < len(ingredients):
-            self.scroll_to_element(self.locators.INGREDIENT_ITEM)
-            self.click_element(self.locators.INGREDIENT_ITEM)
+            # Исправлено: скроллим к конкретному элементу
+            self.driver.execute_script("arguments[0].scrollIntoView();", ingredients[index])
+            ingredients[index].click()
 
-    @allure.step("Закрыть модальное окно")
-    def close_modal(self):
+    @allure.step("Закрыть модальное окно ингредиента")
+    def close_ingredient_modal(self):
         try:
-            self.click_element(self.locators.MODAL_CLOSE_BUTTON)
-            self.wait_for_element_to_disappear(self.locators.MODAL_WINDOW)
+            self.click_element(self.locators.INGREDIENT_MODAL_CLOSE_BUTTON)
+            self.wait_for_element_to_disappear(self.locators.INGREDIENT_MODAL_WINDOW)
         except:
             self.send_escape_key()
+
+    @allure.step("Проверить, что модальное окно ингредиента отображается")
+    def is_ingredient_modal_displayed(self):
+        return self.is_element_visible(self.locators.INGREDIENT_MODAL_WINDOW)
 
     @allure.step("Переключиться на вкладку булок")
     def click_buns_tab(self):
@@ -90,3 +102,7 @@ class MainPage(BasePage):
         except:
             pass
         return 0
+
+    @allure.step("Кликнуть на кнопку оформления заказа")
+    def click_order_button(self):
+        self.click_element(self.locators.ORDER_BUTTON)
