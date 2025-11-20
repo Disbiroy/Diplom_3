@@ -1,0 +1,2 @@
+Initial counter: 0
+New counter: 2
