@@ -1,32 +1,6 @@
 import allure
-from selenium.webdriver.common.by import By
 from .base_page import BasePage
-
-
-class MainPageLocators:
-    # Основные элементы страницы
-    LOGIN_BUTTON = (By.XPATH, "//button[text()='Войти в аккаунт']")
-    PROFILE_BUTTON = (By.XPATH, "//a[contains(@href, 'account')]")
-    CONSTRUCTOR_SECTION = (By.XPATH, "//h1[text()='Соберите бургер']")
-    ORDER_FEED_LINK = (By.XPATH, "//p[contains(text(), 'Лента Заказов')]")
-    CONSTRUCTOR_LINK = (By.XPATH, "//p[contains(text(), 'Конструктор')]")
-
-    # Ингредиенты
-    INGREDIENT_ITEM = (By.XPATH, "//div[contains(@class, 'BurgerIngredient_ingredient')]")
-    INGREDIENT_COUNTER = (By.XPATH, ".//div[contains(@class, 'counter')]")
-
-    # Модальное окно ингредиента
-    INGREDIENT_MODAL_WINDOW = (By.XPATH, "//div[contains(@class, 'Modal_modal')]")
-    INGREDIENT_MODAL_CLOSE_BUTTON = (By.XPATH,
-                                     "//div[contains(@class, 'Modal_modal')]//button[contains(@class, 'Modal_modal__close')]")
-
-    # Вкладки конструктора
-    BUNS_TAB = (By.XPATH, "//span[text()='Булки']/..")
-    SAUCES_TAB = (By.XPATH, "//span[text()='Соусы']/..")
-    FILLINGS_TAB = (By.XPATH, "//span[text()='Начинки']/..")
-
-    # Кнопка оформления заказа
-    ORDER_BUTTON = (By.XPATH, "//button[text()='Оформить заказ']")
+from locators.main_page_locators import MainPageLocators
 
 
 class MainPage(BasePage):
@@ -63,7 +37,6 @@ class MainPage(BasePage):
     def click_ingredient(self, index=0):
         ingredients = self.find_elements(self.locators.INGREDIENT_ITEM)
         if ingredients and index < len(ingredients):
-            # Исправлено: скроллим к конкретному элементу
             self.driver.execute_script("arguments[0].scrollIntoView();", ingredients[index])
             ingredients[index].click()
 

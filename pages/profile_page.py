@@ -1,54 +1,47 @@
 from .base_page import BasePage
-from selenium.webdriver.common.by import By
-
-
-class ProfilePageLocators:
-    # Кнопка личного кабинета в хедере
-    PROFILE_BUTTON = (By.XPATH, "//a[contains(@href, 'account')]")
-
-    # В личном кабинете
-    ORDER_HISTORY_LINK = (By.XPATH, "//a[contains(@href, 'order-history')]")
-    LOGOUT_BUTTON = (By.XPATH, "//button[contains(text(), 'Выход')]")
-    CONSTRUCTOR_LINK = (By.XPATH, "//p[contains(text(), 'Конструктор')]")
-    LOGO_LINK = (By.XPATH, "//div[contains(@class, 'logo')]")
-
-    # Добавим локаторы для проверки загрузки страницы профиля
-    PROFILE_SECTION = (By.XPATH, "//a[contains(@href, '/account/profile')]")
-    PROFILE_FORM = (By.XPATH, "//form[contains(@class, 'Account_form')]")
-    NAME_INPUT = (By.XPATH, "//input[@name='name']")
-    EMAIL_INPUT = (By.XPATH, "//input[@name='email']")
+from locators.profile_page_locators import ProfilePageLocators
+import allure
 
 
 class ProfilePage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
         self.url = "https://stellarburgers.education-services.ru/account/profile"
+        self.locators = ProfilePageLocators
 
+    @allure.step("Перейти в личный кабинет")
     def go_to_profile(self):
-        """Переходит в личный кабинет после логина"""
-        self.click_element(ProfilePageLocators.PROFILE_BUTTON)
+        self.click_element(self.locators.PROFILE_LINK)
 
+    @allure.step("Перейти в историю заказов")
     def go_to_order_history(self):
-        """Переходит в историю заказов"""
-        self.click_element(ProfilePageLocators.ORDER_HISTORY_LINK)
+        self.click_element(self.locators.ORDER_HISTORY_LINK)
 
+    @allure.step("Выйти из аккаунта")
     def logout(self):
-        """Выходит из аккаунта"""
-        self.click_element(ProfilePageLocators.LOGOUT_BUTTON)
+        self.click_element(self.locators.LOGOUT_BUTTON)
 
+    @allure.step("Перейти в конструктор")
     def go_to_constructor(self):
-        """Переходит в конструктор"""
-        self.click_element(ProfilePageLocators.CONSTRUCTOR_LINK)
+        self.click_element(self.locators.CONSTRUCTOR_LINK)
 
+    @allure.step("Проверить что мы на странице истории заказов")
     def is_order_history_visible(self):
-        """Проверяет что мы на странице истории заказов"""
         return "order-history" in self.current_url()
 
+    @allure.step("Проверить что загрузилась страница профиля")
     def is_profile_page_loaded(self):
-        """Проверяет что загрузилась страница профиля"""
         try:
             current_url = self.current_url()
-            # Простая проверка - если URL содержит /account, считаем что это профиль
-            return "/account" in current_url
-        except:
+            # Более надежная проверка - проверяем URL и наличие элементов профиля
+            is_correct_url = "/account" in current_url
+            has_profile_elements = (
+                self.is_element_visible(self.locators.PROFILE_LINK, timeout=5) or
+                self.is_element_visible(self.locators.NAME_INPUT, timeout=5) or
+                self.is_element_visible(self.locators.EMAIL_INPUT, timeout=5) or
+                self.is_element_visible(self.locators.LOGOUT_BUTTON, timeout=5)
+            )
+            return is_correct_url and has_profile_elements
+        except Exception as e:
+            print(f"Error checking profile page: {e}")
             return False
